@@ -164,6 +164,8 @@ MIDDLEWARE = [
     'corehq.apps.cloudcare.middleware.CloudcareMiddleware',
 ]
 
+X_FRAME_OPTIONS = 'DENY'
+
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 
 # time in minutes before forced logout due to inactivity
@@ -373,6 +375,7 @@ HQ_APPS = (
     'custom.covid',
     'custom.aaa',
     'custom.inddex',
+    'custom.onse',
 
     'custom.ccqa',
 
@@ -1065,6 +1068,10 @@ DEFAULT_COMMCARE_EXTENSIONS = [
 COMMCARE_EXTENSIONS = []
 
 IGNORE_ALL_DEMO_USER_SUBMISSIONS = False
+
+# to help in performance, avoid use of phone entries in an environment that does not need them
+# so HQ does not try to keep them up to date
+USE_PHONE_ENTRIES = True
 
 try:
     # try to see if there's an environmental variable set for local_settings
@@ -1941,6 +1948,7 @@ DOMAIN_MODULE_MAP = {
 
     'succeed': 'custom.succeed',
     'champ-cameroon': 'custom.champ',
+    'onse-iss': 'custom.onse',
 
     # From DOMAIN_MODULE_CONFIG on production
     'test-pna': 'custom.intrahealth',
@@ -2065,7 +2073,3 @@ if RESTRICT_USED_PASSWORDS_FOR_NIC_COMPLIANCE:
     ]
 
 PACKAGE_MONITOR_REQUIREMENTS_FILE = os.path.join(FILEPATH, 'requirements', 'requirements.txt')
-
-# to help in performance, avoid use of phone entries in an environment that does not need them
-# so HQ does not try to keep them up to date
-USE_PHONE_ENTRIES = True
