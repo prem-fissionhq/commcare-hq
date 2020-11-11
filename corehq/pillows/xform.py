@@ -137,7 +137,7 @@ def transform_xform_for_elasticsearch(doc_dict):
     return doc_ret
 
 
-def get_xform_to_elasticsearch_pillow(pillow_id='XFormToElasticsearchPillow', num_processes=1,
+def get_xform_to_elasticsearch_pillow(pillow_id='XFormToElasticsearchPillow', num_processes=1, dedicated_migration_process=False,
                                       process_num=0, **kwargs):
     """XForm change processor that sends form data to Elasticsearch
 
@@ -154,13 +154,14 @@ def get_xform_to_elasticsearch_pillow(pillow_id='XFormToElasticsearchPillow', nu
         doc_filter_fn=xform_pillow_filter,
     )
     kafka_change_feed = KafkaChangeFeed(
-        topics=FORM_TOPICS, client_id='forms-to-es', num_processes=num_processes, process_num=process_num
+        topics=FORM_TOPICS, client_id='forms-to-es', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=kafka_change_feed,
         processor=form_processor,
+        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=kafka_change_feed
         ),

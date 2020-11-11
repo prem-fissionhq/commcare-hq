@@ -74,7 +74,7 @@ class CaseMessagingSyncProcessor(BulkPillowProcessor):
 
 
 def get_case_messaging_sync_pillow(pillow_id='case_messaging_sync_pillow', topics=None,
-                         num_processes=1, process_num=0,
+                         num_processes=1, process_num=0, dedicated_migration_process=False,
                          processor_chunk_size=DEFAULT_PROCESSOR_CHUNK_SIZE, **kwargs):
     """Pillow for synchronizing messaging data with case data.
 
@@ -85,7 +85,7 @@ def get_case_messaging_sync_pillow(pillow_id='case_messaging_sync_pillow', topic
         assert set(topics).issubset(CASE_TOPICS), set(topics) - set(CASE_TOPICS)
     topics = topics or CASE_TOPICS
     change_feed = KafkaChangeFeed(
-        topics, client_id=pillow_id, num_processes=num_processes, process_num=process_num
+        topics, client_id=pillow_id, num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
     )
     checkpoint = KafkaPillowCheckpoint(pillow_id, topics)
     event_handler = KafkaCheckpointEventHandler(
@@ -97,5 +97,6 @@ def get_case_messaging_sync_pillow(pillow_id='case_messaging_sync_pillow', topic
         checkpoint=checkpoint,
         change_processed_event_handler=event_handler,
         processor=[CaseMessagingSyncProcessor()],
-        processor_chunk_size=processor_chunk_size
+        processor_chunk_size=processor_chunk_size,
+        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
     )

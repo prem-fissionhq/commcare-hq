@@ -19,7 +19,7 @@ from pillowtop.reindexer.reindexer import Reindexer, ReindexerFactory
 
 
 def get_form_submission_metadata_tracker_pillow(pillow_id='FormSubmissionMetadataTrackerPillow',
-                                                num_processes=1, process_num=0, **kwargs):
+                                                dedicated_migration_process=False, num_processes=1, process_num=0, **kwargs):
     """
     This gets a pillow which iterates through all forms and marks the corresponding app
     as having submissions.
@@ -30,7 +30,7 @@ def get_form_submission_metadata_tracker_pillow(pillow_id='FormSubmissionMetadat
     # todo; To remove after full rollout of https://github.com/dimagi/commcare-hq/pull/21329/
     change_feed = KafkaChangeFeed(
         topics=topics.FORM_TOPICS, client_id='form-processsor',
-        num_processes=num_processes, process_num=process_num
+        num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
     )
     checkpoint = KafkaPillowCheckpoint('form-submission-metadata-tracker', topics.FORM_TOPICS)
     form_processor = FormSubmissionMetadataTrackerProcessor()
@@ -39,6 +39,7 @@ def get_form_submission_metadata_tracker_pillow(pillow_id='FormSubmissionMetadat
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=form_processor,
+        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed,
         ),

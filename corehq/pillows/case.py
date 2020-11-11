@@ -50,7 +50,7 @@ def transform_case_for_elasticsearch(doc_dict):
 
 
 def get_case_to_elasticsearch_pillow(pillow_id='CaseToElasticsearchPillow', num_processes=1,
-                                     process_num=0, **kwargs):
+                                     dedicated_migration_process=False, process_num=0, **kwargs):
     """Return a pillow that processes cases to Elasticsearch.
 
     Processors:
@@ -75,6 +75,7 @@ def get_case_to_elasticsearch_pillow(pillow_id='CaseToElasticsearchPillow', num_
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=kafka_change_feed
         ),
+        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
     )
 
 
@@ -82,7 +83,8 @@ def get_case_pillow(
         pillow_id='case-pillow', ucr_division=None,
         include_ucrs=None, exclude_ucrs=None,
         num_processes=1, process_num=0, ucr_configs=None, skip_ucr=False,
-        processor_chunk_size=DEFAULT_PROCESSOR_CHUNK_SIZE, topics=None, **kwargs):
+        processor_chunk_size=DEFAULT_PROCESSOR_CHUNK_SIZE, topics=None,
+        dedicated_migration_process=False, **kwargs):
     """Return a pillow that processes cases. The processors include, UCR and elastic processors
 
     Processors:
@@ -95,7 +97,7 @@ def get_case_pillow(
         assert set(topics).issubset(CASE_TOPICS), "This is a pillow to process cases only"
     topics = topics or CASE_TOPICS
     change_feed = KafkaChangeFeed(
-        topics, client_id=pillow_id, num_processes=num_processes, process_num=process_num
+        topics, client_id=pillow_id, num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
     )
     ucr_processor = ConfigurableReportPillowProcessor(
         data_source_providers=[DynamicDataSourceProvider('CommCareCase'), StaticDataSourceProvider('CommCareCase')],
@@ -134,7 +136,8 @@ def get_case_pillow(
         checkpoint=checkpoint,
         change_processed_event_handler=event_handler,
         processor=processors,
-        processor_chunk_size=processor_chunk_size
+        processor_chunk_size=processor_chunk_size,
+        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
     )
 
 
