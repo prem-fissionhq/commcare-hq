@@ -31,7 +31,7 @@ class GroupsToUsersProcessor(PillowProcessor):
             update_es_user_with_groups(change.get_document())
 
 
-def get_group_to_user_pillow(pillow_id='GroupToUserPillow', num_processes=1, process_num=0, **kwargs):
+def get_group_to_user_pillow(pillow_id='GroupToUserPillow', num_processes=1, process_num=0, dedicated_migration_process=False, **kwargs):
     """Group pillow that updates user data in Elasticsearch with group membership
 
     Processors:
@@ -42,20 +42,21 @@ def get_group_to_user_pillow(pillow_id='GroupToUserPillow', num_processes=1, pro
     checkpoint = get_checkpoint_for_elasticsearch_pillow(pillow_id, USER_INDEX_INFO, [topics.GROUP])
     processor = GroupsToUsersProcessor()
     change_feed = KafkaChangeFeed(
-        topics=[topics.GROUP], client_id='groups-to-users', num_processes=num_processes, process_num=process_num
+        topics=[topics.GROUP], client_id='groups-to-users', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=processor,
+        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=10, change_feed=change_feed
         ),
     )
 
 
-def get_group_pillow(pillow_id='group-pillow', num_processes=1, process_num=0, **kwargs):
+def get_group_pillow(pillow_id='group-pillow', num_processes=1, process_num=0, dedicated_migration_process=False, **kwargs):
     """Group pillow
 
     Processors:
@@ -66,7 +67,7 @@ def get_group_pillow(pillow_id='group-pillow', num_processes=1, process_num=0, *
     to_user_es_processor = GroupsToUsersProcessor()
     to_group_es_processor = get_group_to_elasticsearch_processor()
     change_feed = KafkaChangeFeed(
-        topics=[topics.GROUP], client_id='groups-to-users', num_processes=num_processes, process_num=process_num
+        topics=[topics.GROUP], client_id='groups-to-users', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
     )
     checkpoint_id = "{}-{}-{}".format(
         pillow_id, USER_INDEX, to_group_es_processor.index_info.index)
@@ -76,6 +77,7 @@ def get_group_pillow(pillow_id='group-pillow', num_processes=1, process_num=0, *
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=[to_user_es_processor, to_group_es_processor],
+        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=10, change_feed=change_feed
         ),

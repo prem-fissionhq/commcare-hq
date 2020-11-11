@@ -55,7 +55,6 @@ class PillowBase(metaclass=ABCMeta):
     retry_errors = True
     # this will be the batch size for processors that support batch processing
     processor_chunk_size = 0
-    is_dedicated_migration_process = False
 
     @abstractproperty
     def pillow_id(self):
@@ -105,14 +104,19 @@ class PillowBase(metaclass=ABCMeta):
         """
         Main entry point for running pillows forever.
         """
+        print("in interface ",self.is_dedicated_migration_process)
         pillow_logging.info("Starting pillow %s" % self.__class__)
         with configure_scope() as scope:
+            print("in interface with condition")
             scope.set_tag("pillow_name", self.get_name())
-        if self.is_dedicated_migration_process:
+        if self.process_num==0  and self.is_dedicated_migration_process:
+            print("in interface if condition", self.processors)
             for processor in self.processors:
+                print(processor)
                 processor.bootstrap_if_needed()
-            time.sleep(1)
+            time.sleep(10)
         else:
+            print("in interface run else condition")
             self.process_changes(since=self.get_last_checkpoint_sequence(), forever=True)
 
     def _update_checkpoint(self, change, context):
@@ -424,8 +428,8 @@ class ConstructedPillow(PillowBase):
     arguments it needs.
     """
 
-    def __init__(self, name, checkpoint, change_feed, processor,
-                 change_processed_event_handler=None, processor_chunk_size=0, is_dedicated_migration_process=False):
+    def __init__(self, name, checkpoint, change_feed, processor, is_dedicated_migration_process=False,
+                 change_processed_event_handler=None, processor_chunk_size=0):
         self._name = name
         self._checkpoint = checkpoint
         self._change_feed = change_feed
