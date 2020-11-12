@@ -104,19 +104,15 @@ class PillowBase(metaclass=ABCMeta):
         """
         Main entry point for running pillows forever.
         """
-        print("in interface ",self.is_dedicated_migration_process)
         pillow_logging.info("Starting pillow %s" % self.__class__)
         with configure_scope() as scope:
-            print("in interface with condition")
             scope.set_tag("pillow_name", self.get_name())
         if self.process_num==0  and self.is_dedicated_migration_process:
-            print("in interface if condition", self.processors)
             for processor in self.processors:
                 print(processor)
                 processor.bootstrap_if_needed()
             time.sleep(10)
         else:
-            print("in interface run else condition")
             self.process_changes(since=self.get_last_checkpoint_sequence(), forever=True)
 
     def _update_checkpoint(self, change, context):

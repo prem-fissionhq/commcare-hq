@@ -193,9 +193,7 @@ class ConfigurableReportTableManagerMixin(object):
             self.table_adapters_by_domain[config.domain].append(
                 self._get_indicator_adapter(config)
             )
-        print("Value of run_migrations ", self.run_migrations)
         if self.run_migrations:
-            print("running migrations ", self.run_migrations)
             self.rebuild_tables_if_necessary()
 
         self.bootstrapped = True
@@ -288,7 +286,6 @@ class ConfigurableReportTableManagerMixin(object):
         and update the in-memory references.
         """
         new_last_imported = datetime.utcnow()
-        print("new_last_imported : ",new_last_imported)
         new_data_sources = [
             source
             for provider in self.data_source_providers
