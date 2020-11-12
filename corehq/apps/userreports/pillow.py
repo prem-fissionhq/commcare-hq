@@ -183,7 +183,6 @@ class ConfigurableReportTableManagerMixin(object):
 
     def bootstrap(self, configs=None):
         configs = self.get_filtered_configs(configs)
-        print(configs)
         if not configs:
             pillow_logging.warning("UCR pillow has no configs to process")
 
