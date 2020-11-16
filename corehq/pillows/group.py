@@ -27,7 +27,7 @@ def get_group_to_elasticsearch_processor():
     )
 
 
-def get_group_pillow_old(pillow_id='GroupPillow', num_processes=1, process_num=0, dedicated_migration_process=False, **kwargs):
+def get_group_pillow_old(pillow_id='GroupPillow', num_processes=1, process_num=0, **kwargs):
     """Group pillow (old). Sends Group data to Elasticsearch
 
     Processors:
@@ -38,14 +38,13 @@ def get_group_pillow_old(pillow_id='GroupPillow', num_processes=1, process_num=0
     checkpoint = get_checkpoint_for_elasticsearch_pillow(pillow_id, GROUP_INDEX_INFO, [topics.GROUP])
     processor = get_group_to_elasticsearch_processor()
     change_feed = KafkaChangeFeed(
-        topics=[topics.GROUP], client_id='groups-to-es', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        topics=[topics.GROUP], client_id='groups-to-es', num_processes=num_processes, process_num=process_num
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=processor,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=10, change_feed=change_feed
         ),

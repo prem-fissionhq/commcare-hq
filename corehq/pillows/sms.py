@@ -21,7 +21,7 @@ from corehq.pillows.mappings.sms_mapping import SMS_INDEX_INFO
 from corehq.util.doc_processor.sql import SqlDocumentProvider
 
 
-def get_sql_sms_pillow(pillow_id='SqlSMSPillow', num_processes=1, process_num=0, dedicated_migration_process=False,
+def get_sql_sms_pillow(pillow_id='SqlSMSPillow', num_processes=1, process_num=0,
                        processor_chunk_size=DEFAULT_PROCESSOR_CHUNK_SIZE, **kwargs):
     """SMS Pillow
 
@@ -37,7 +37,7 @@ def get_sql_sms_pillow(pillow_id='SqlSMSPillow', num_processes=1, process_num=0,
     )
     change_feed = KafkaChangeFeed(
         topics=[topics.SMS], client_id='sql-sms-to-es',
-        num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        num_processes=num_processes, process_num=process_num
     )
     return ConstructedPillow(
         name=pillow_id,
@@ -47,8 +47,7 @@ def get_sql_sms_pillow(pillow_id='SqlSMSPillow', num_processes=1, process_num=0,
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed
         ),
-        processor_chunk_size=processor_chunk_size,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
+        processor_chunk_size=processor_chunk_size
     )
 
 

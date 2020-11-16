@@ -43,14 +43,14 @@ def _synclog_pillow_dbs():
 
 
 def get_user_sync_history_pillow(
-        pillow_id='UpdateUserSyncHistoryPillow', num_processes=1, process_num=0, dedicated_migration_process=False, **kwargs):
+        pillow_id='UpdateUserSyncHistoryPillow', num_processes=1, process_num=0, **kwargs):
     """Synclog pillow
 
     Processors:
       - :py:func:`corehq.pillows.synclog.UserSyncHistoryProcessor`
     """
     change_feed = KafkaChangeFeed(
-        topics=[topics.SYNCLOG_SQL], client_id=SYNCLOG_SQL_USER_SYNC_GROUP_ID, dedicated_migration_process=dedicated_migration_process,
+        topics=[topics.SYNCLOG_SQL], client_id=SYNCLOG_SQL_USER_SYNC_GROUP_ID,
         num_processes=num_processes, process_num=process_num)
     checkpoint = KafkaPillowCheckpoint(pillow_id, [topics.SYNCLOG_SQL])
     return ConstructedPillow(
@@ -58,7 +58,6 @@ def get_user_sync_history_pillow(
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=UserSyncHistoryProcessor(),
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed
         ),

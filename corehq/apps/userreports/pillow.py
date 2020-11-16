@@ -606,7 +606,7 @@ def get_kafka_ucr_static_pillow(pillow_id='kafka-ucr-static', ucr_division=None,
     )
 
 
-def get_location_pillow(pillow_id='location-ucr-pillow', include_ucrs=None, dedicated_migration_process=False,
+def get_location_pillow(pillow_id='location-ucr-pillow', include_ucrs=None,
                         num_processes=1, process_num=0, ucr_configs=None, **kwargs):
     """Processes updates to locations for UCR
 
@@ -634,6 +634,5 @@ def get_location_pillow(pillow_id='location-ucr-pillow', include_ucrs=None, dedi
         change_feed=change_feed,
         checkpoint=checkpoint,
         change_processed_event_handler=event_handler,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         processor=[ucr_processor]
     )

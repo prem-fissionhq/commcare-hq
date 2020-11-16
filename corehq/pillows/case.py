@@ -50,7 +50,7 @@ def transform_case_for_elasticsearch(doc_dict):
 
 
 def get_case_to_elasticsearch_pillow(pillow_id='CaseToElasticsearchPillow', num_processes=1,
-                                     dedicated_migration_process=False, process_num=0, **kwargs):
+                                    process_num=0, **kwargs):
     """Return a pillow that processes cases to Elasticsearch.
 
     Processors:
@@ -75,7 +75,6 @@ def get_case_to_elasticsearch_pillow(pillow_id='CaseToElasticsearchPillow', num_
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=kafka_change_feed
         ),
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
     )
 
 
