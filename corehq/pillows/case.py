@@ -96,7 +96,8 @@ def get_case_pillow(
         assert set(topics).issubset(CASE_TOPICS), "This is a pillow to process cases only"
     topics = topics or CASE_TOPICS
     change_feed = KafkaChangeFeed(
-        topics, client_id=pillow_id, num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        topics, client_id=pillow_id, num_processes=num_processes, process_num=process_num,
+        dedicated_migration_process=dedicated_migration_process
     )
     ucr_processor = ConfigurableReportPillowProcessor(
         data_source_providers=[DynamicDataSourceProvider('CommCareCase'), StaticDataSourceProvider('CommCareCase')],
@@ -136,6 +137,7 @@ def get_case_pillow(
         change_processed_event_handler=event_handler,
         processor=processors,
         processor_chunk_size=processor_chunk_size,
+        process_num=process_num,
         is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
     )
 

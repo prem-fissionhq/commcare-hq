@@ -236,6 +236,7 @@ def get_xform_pillow(pillow_id='xform-pillow', ucr_division=None,
         change_processed_event_handler=event_handler,
         processor=processors,
         processor_chunk_size=processor_chunk_size,
+        process_num=process_num,
         is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
     )
 
