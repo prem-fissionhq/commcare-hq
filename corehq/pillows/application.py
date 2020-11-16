@@ -21,7 +21,7 @@ def transform_app_for_es(doc_dict):
 
 
 def get_app_to_elasticsearch_pillow(pillow_id='ApplicationToElasticsearchPillow', num_processes=1,
-                                    dedicated_migration_process=False, process_num=0, **kwargs):
+                                    process_num=0, **kwargs):
     """App pillow
 
     Processors:
@@ -35,14 +35,13 @@ def get_app_to_elasticsearch_pillow(pillow_id='ApplicationToElasticsearchPillow'
         doc_prep_fn=transform_app_for_es
     )
     change_feed = KafkaChangeFeed(
-        topics=[topics.APP], client_id='apps-to-es', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process,
+        topics=[topics.APP], client_id='apps-to-es', num_processes=num_processes, process_num=process_num
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=app_processor,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed
         ),

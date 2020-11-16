@@ -26,7 +26,7 @@ def transform_domain_for_elasticsearch(doc_dict):
     return doc_ret
 
 
-def get_domain_kafka_to_elasticsearch_pillow(pillow_id='KafkaDomainPillow', num_processes=1, dedicated_migration_process=False,
+def get_domain_kafka_to_elasticsearch_pillow(pillow_id='KafkaDomainPillow', num_processes=1,
                                              process_num=0, **kwargs):
     """Domain pillow to replicate documents to ES
 
@@ -41,14 +41,13 @@ def get_domain_kafka_to_elasticsearch_pillow(pillow_id='KafkaDomainPillow', num_
         doc_prep_fn=transform_domain_for_elasticsearch,
     )
     change_feed = KafkaChangeFeed(
-        topics=[topics.DOMAIN], client_id='domains-to-es', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        topics=[topics.DOMAIN], client_id='domains-to-es', num_processes=num_processes, process_num=process_num
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=domain_processor,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed
         ),

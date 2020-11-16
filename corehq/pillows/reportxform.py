@@ -35,7 +35,7 @@ def transform_xform_for_report_forms_index(doc_dict):
     return doc_ret
 
 
-def get_report_xform_to_elasticsearch_pillow(pillow_id='ReportXFormToElasticsearchPillow', num_processes=1, dedicated_migration_process=False,
+def get_report_xform_to_elasticsearch_pillow(pillow_id='ReportXFormToElasticsearchPillow', num_processes=1,
                                              process_num=0, **kwargs):
     # todo; To remove after full rollout of https://github.com/dimagi/commcare-hq/pull/21329/
     assert pillow_id == 'ReportXFormToElasticsearchPillow', 'Pillow ID is not allowed to change'
@@ -48,14 +48,13 @@ def get_report_xform_to_elasticsearch_pillow(pillow_id='ReportXFormToElasticsear
     )
     kafka_change_feed = KafkaChangeFeed(
         topics=topics.FORM_TOPICS, client_id='report-forms-to-es',
-        num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        num_processes=num_processes, process_num=process_num
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=kafka_change_feed,
         processor=form_processor,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=kafka_change_feed
         ),

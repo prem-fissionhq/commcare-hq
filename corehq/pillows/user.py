@@ -117,7 +117,7 @@ def get_user_es_processor():
     )
 
 
-def get_user_pillow_old(pillow_id='UserPillow', num_processes=1, process_num=0, dedicated_migration_process=False, **kwargs):
+def get_user_pillow_old(pillow_id='UserPillow', num_processes=1, process_num=0, **kwargs):
     """Processes users and sends them to ES.
 
     Processors:
@@ -132,14 +132,13 @@ def get_user_pillow_old(pillow_id='UserPillow', num_processes=1, process_num=0, 
         doc_prep_fn=transform_user_for_elasticsearch,
     )
     change_feed = KafkaChangeFeed(
-        topics=topics.USER_TOPICS, client_id='users-to-es', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        topics=topics.USER_TOPICS, client_id='users-to-es', num_processes=num_processes, process_num=process_num
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=user_processor,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed
         ),
@@ -163,7 +162,8 @@ def get_user_pillow(pillow_id='user-pillow', num_processes=1, dedicated_migratio
         run_migrations=(process_num == 0),  # only first process runs migrations
     )
     change_feed = KafkaChangeFeed(
-        topics=topics.USER_TOPICS, client_id='users-to-es', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        topics=topics.USER_TOPICS, client_id='users-to-es', num_processes=num_processes, process_num=process_num,
+        dedicated_migration_process=dedicated_migration_process
     )
     return ConstructedPillow(
         name=pillow_id,
@@ -178,7 +178,7 @@ def get_user_pillow(pillow_id='user-pillow', num_processes=1, dedicated_migratio
     )
 
 
-def get_unknown_users_pillow(pillow_id='unknown-users-pillow', num_processes=1, process_num=0, dedicated_migration_process=False, **kwargs):
+def get_unknown_users_pillow(pillow_id='unknown-users-pillow', num_processes=1, process_num=0, **kwargs):
     """This pillow adds users from xform submissions that come in to the User Index if they don't exist in HQ
 
         Processors:
@@ -188,14 +188,13 @@ def get_unknown_users_pillow(pillow_id='unknown-users-pillow', num_processes=1, 
     checkpoint = get_checkpoint_for_elasticsearch_pillow(pillow_id, USER_INDEX_INFO, topics.FORM_TOPICS)
     processor = UnknownUsersProcessor()
     change_feed = KafkaChangeFeed(
-        topics=topics.FORM_TOPICS, client_id='unknown-users', num_processes=num_processes, process_num=process_num, dedicated_migration_process=dedicated_migration_process
+        topics=topics.FORM_TOPICS, client_id='unknown-users', num_processes=num_processes, process_num=process_num
     )
     return ConstructedPillow(
         name=pillow_id,
         checkpoint=checkpoint,
         change_feed=change_feed,
         processor=processor,
-        is_dedicated_migration_process=dedicated_migration_process and (process_num == 0),
         change_processed_event_handler=KafkaCheckpointEventHandler(
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed
         ),
