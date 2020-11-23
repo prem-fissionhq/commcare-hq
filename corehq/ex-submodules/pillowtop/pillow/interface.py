@@ -107,9 +107,8 @@ class PillowBase(metaclass=ABCMeta):
         pillow_logging.info("Starting pillow %s" % self.__class__)
         with configure_scope() as scope:
             scope.set_tag("pillow_name", self.get_name())
-        if self.process_num == 0  and self.is_dedicated_migration_process:
+        if self.is_dedicated_migration_process:
             for processor in self.processors:
-                print(processor)
                 processor.bootstrap_if_needed()
             time.sleep(10)
         else:
@@ -437,7 +436,6 @@ class ConstructedPillow(PillowBase):
 
         self._change_processed_event_handler = change_processed_event_handler
         self.is_dedicated_migration_process = is_dedicated_migration_process
-        self.process_num = process_num
 
     @property
     def topics(self):

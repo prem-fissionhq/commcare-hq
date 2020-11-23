@@ -174,6 +174,7 @@ def get_user_pillow(pillow_id='user-pillow', num_processes=1, dedicated_migratio
             checkpoint=checkpoint, checkpoint_frequency=100, change_feed=change_feed
         ),
         processor_chunk_size=processor_chunk_size,
+        process_num=process_num,
         is_dedicated_migration_process=dedicated_migration_process and (process_num == 0)
     )
 

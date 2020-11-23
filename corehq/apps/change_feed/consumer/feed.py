@@ -163,7 +163,6 @@ class KafkaChangeFeed(ChangeFeed):
 
     def _filter_partitions(self, topic_partitions):
         topic_partitions.sort()
-        # do differently if self.dedicated_migration_process
         if not self.dedicated_migration_process:
             return [
                 topic_partitions[num::self.num_processes]
